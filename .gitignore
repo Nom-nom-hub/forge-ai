@@ -1,0 +1,37 @@
+# Binaries
+forgeai
+*.exe
+
+# Build artifacts
+dist/
+build/
+
+# Go
+*.out
+*.test
+go.mod
+go.sum
+
+# Temporary files
+tmp/
+temp/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage.txt
+coverage.html
+
+# Dependencies
+vendor/
