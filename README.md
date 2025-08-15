@@ -22,8 +22,8 @@ ForgeAI is a secure, sandboxed code execution platform that allows you to run un
 ### Quick Install
 ```bash
 # Clone the repository
-git clone https://github.com/forgeai/forgeai.git
-cd forgeai
+git clone https://github.com/Nom-nom-hub/forge-ai.git
+cd forge-ai
 
 # Build binaries
 make all
@@ -35,7 +35,7 @@ make install
 ### Manual Installation
 ```bash
 # Download the latest release
-wget https://github.com/forgeai/forgeai/releases/latest/download/forgeai-linux-amd64.tar.gz
+wget https://github.com/Nom-nom-hub/forge-ai/releases/latest/download/forgeai-linux-amd64.tar.gz
 tar -xzf forgeai-linux-amd64.tar.gz
 sudo mv forgeai* /usr/local/bin/
 ```
@@ -306,8 +306,8 @@ FORGEAI_DEBUG=true forgeai-api
 ### Development Setup
 ```bash
 # Clone repository
-git clone https://github.com/forgeai/forgeai.git
-cd forgeai
+git clone https://github.com/Nom-nom-hub/forge-ai.git
+cd forge-ai
 
 # Install dependencies
 make deps
@@ -345,8 +345,8 @@ ForgeAI is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 ## Support
 
 ### Community
-- GitHub Issues: https://github.com/forgeai/forgeai/issues
-- Discussions: https://github.com/forgeai/forgeai/discussions
+- GitHub Issues: https://github.com/Nom-nom-hub/forge-ai/issues
+- Discussions: https://github.com/Nom-nom-hub/forge-ai/discussions
 
 ### Commercial Support
 For enterprise support options, contact support@forgeai.dev
