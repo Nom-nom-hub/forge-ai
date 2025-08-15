@@ -37,24 +37,24 @@ var runCmd = &cobra.Command{
 		language := args[0]
 		code := args[1]
 
-		var executor sandbox.Executor
+		var exec sandbox.Executor
 
 		if containerized {
 			// Use containerized executor
 			dockerExec := container.NewDockerExecutor()
 			dockerExec.Timeout = timeout
 			dockerExec.MemoryLimit = memoryLimit
-			executor = dockerExec
+			exec = dockerExec
 		} else {
 			// Use local executor
 			localExec := executor.NewLocalExecutor()
 			localExec.Timeout = timeout
 			localExec.MemoryLimit = memoryLimit
-			executor = localExec
+			exec = localExec
 		}
 
 		// Execute code
-		result, err := executor.Execute(context.Background(), language, code)
+		result, err := exec.Execute(context.Background(), language, code)
 		if err != nil {
 			return fmt.Errorf("failed to execute code: %w", err)
 		}
@@ -107,8 +107,17 @@ var langListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List supported languages",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		exec := executor.NewLocalExecutor()
-		languages := exec.SupportedLanguages()
+		var languages []string
+
+		if containerized {
+			// Use containerized executor
+			exec := container.NewDockerExecutor()
+			languages = exec.SupportedLanguages()
+		} else {
+			// Use local executor
+			exec := executor.NewLocalExecutor()
+			languages = exec.SupportedLanguages()
+		}
 
 		if jsonOutput {
 			return json.NewEncoder(os.Stdout).Encode(languages)
