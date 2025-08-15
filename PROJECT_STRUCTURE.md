@@ -1,154 +1,197 @@
-# ForgeAI Project - Complete File Structure
+# ForgeAI Project Structure
 
-## Core Implementation Files
-
-### Main Application
-- `forgeai.exe` - Compiled CLI application
-- `go.mod` - Go module definition
-- `go.sum` - Go dependency checksums
-- `Makefile` - Build and development commands
-- `README.md` - Project overview and usage instructions
-- `LICENSE` - MIT license file
-- `CHANGELOG.md` - Version history
-- `CONTRIBUTING.md` - Contribution guidelines
-
-### Command Line Interface
+## Root Directory
 ```
-cmd/forgeai/
-└── main.go                # CLI entry point
-```
-
-### Core Packages
-```
-pkg/
-├── cli/
-│   └── cli.go             # Command-line parsing and commands
-├── sandbox/
-│   └── sandbox.go         # Sandbox interface definition
-├── executor/
-│   └── executor.go        # Code execution implementation
-├── config/
-│   └── config.go          # Configuration management
-└── output/
-    └── output.go          # Output formatting
+forgeai/
+├── .gitignore                 # Git ignore patterns
+├── CHANGELOG.md               # Version history
+├── CONTRIBUTING.md            # Contribution guidelines
+├── go.mod                     # Go module definition
+├── go.sum                     # Go dependency checksums
+├── LICENSE                    # MIT license
+├── Makefile                   # Build automation
+├── PRD.md                     # Product requirements document
+├── README.md                  # Project overview
+├── forgeai.exe                # CLI application
+├── forgeai-api.exe            # REST API server
+├── forgeai-plugin.exe         # Plugin manager
+├── forgeai-security.exe       # Security testing tool
+├── forgeai-perf.exe           # Performance testing tool
+└── forgeai-performance.exe    # Performance testing tool
 ```
 
-### Testing
+## Source Code Structure
 ```
-test/
-└── executor_test.go       # Unit tests for executor
+forgeai/
+├── cmd/                       # Command-line applications
+│   ├── forgeai/               # CLI application
+│   │   └── main.go            # CLI entry point
+│   ├── api/                   # REST API server
+│   │   └── main.go            # API server entry point
+│   ├── plugin/                # Plugin manager
+│   │   └── main.go            # Plugin manager entry point
+│   ├── security/              # Security testing tool
+│   │   └── main.go            # Security testing entry point
+│   └── performance/           # Performance testing tool
+│       └── main.go            # Performance testing entry point
+├── pkg/                       # Go packages
+│   ├── api/                   # REST API implementation
+│   │   ├── server.go          # API server
+│   │   └── jobs.go            # Job management
+│   ├── cli/                   # CLI interface
+│   │   └── cli.go             # Command-line parsing
+│   ├── config/                # Configuration management
+│   │   └── config.go          # Configuration handling
+│   ├── container/              # Containerized execution
+│   │   ├── container.go        # Container executor interface
+│   │   └── docker.go          # Docker executor implementation
+│   ├── executor/              # Local execution
+│   │   └── executor.go        # Local executor implementation
+│   ├── output/                # Output formatting
+│   │   └── output.go          # Output handling
+│   ├── plugin/                # Plugin system
+│   │   ├── manager.go         # Plugin manager
+│   │   └── plugin.go          # Plugin interface
+│   ├── registry/              # Plugin registry
+│   │   └── client.go          # Registry client
+│   ├── sandbox/              # Sandbox interface
+│   │   └── sandbox.go         # Sandbox interface definition
+│   ├── security/              # Security testing
+│   │   ├── containerized.go   # Containerized executor
+│   │   ├── executor.go        # Secure executor
+│   │   └── testing.go         # Security testing framework
+│   └── performance/           # Performance testing
+│       └── testing.go          # Performance testing framework
+├── docs/                      # Documentation
+│   ├── API_DOCS.md            # REST API documentation
+│   ├── CONFIG.md              # Configuration guide
+│   ├── INTEGRATION.md         # Integration guide
+│   └── API.md                 # Go SDK API reference
+├── examples/                 # Example files
+│   ├── hello_world.py         # Python example
+│   ├── hello_world.go         # Go example
+│   └── hello_world.js        # JavaScript example
+├── plugins/                   # Plugin directory
+│   ├── hello-plugin/         # Hello plugin
+│   │   ├── manifest.json      # Plugin manifest
+│   │   └── hello-plugin.exe  # Plugin executable
+│   └── rust-plugin/          # Rust plugin
+│       ├── manifest.json      # Plugin manifest
+│       └── rust-plugin.exe    # Plugin executable
+└── test/                      # Tests
+    └── executor_test.go       # Unit tests
 ```
 
-### Examples
+## Documentation
 ```
-examples/
-├── README.md              # Example files overview
-├── hello_world.py         # Python example
-├── hello_world.go         # Go example
-└── hello_world.js         # JavaScript example
+forgeai/
+├── README.md                  # Project overview
+├── CHANGELOG.md               # Version history
+├── CONTRIBUTING.md            # Contribution guidelines
+├── LICENSE                    # MIT license
+├── docs/                      # Comprehensive documentation
+│   ├── API_DOCS.md            # REST API documentation
+│   ├── CONFIG.md              # Configuration guide
+│   ├── INTEGRATION.md         # Integration guide
+│   └── API.md                 # Go SDK API reference
+
+
+## Testing
+```
+forgeai/
+├── test/                      # Unit and integration tests
+│   └── executor_test.go       # Executor unit tests
+├── cmd/security/main.go       # Security testing tool
+├── cmd/performance/main.go    # Performance testing tool
+├── forgeai-security.exe       # Security testing executable
+├── forgeai-perf.exe           # Performance testing executable
+└── forgeai-performance.exe    # Performance testing executable
 ```
 
-### Documentation
-```
-docs/
-├── README.md              # Main documentation
-├── API.md                 # Go SDK API reference
-├── CONFIG.md              # Configuration guide
-└── INTEGRATION.md         # Integration guide
-```
+## Key Features
 
-## Advanced Enhancement Specifications
-
-### Next-Level Features Planning
-- `NEXT_LEVEL_ENHANCEMENTS.md` - Comprehensive roadmap for advanced features
-- `COMPLETE_ROADMAP.md` - Detailed implementation timeline
-
-### Technical Specifications
-- `CONTAINERIZED_EXECUTION_SPEC.md` - Containerization implementation plan
-- `PLUGIN_SYSTEM_SPEC.md` - Plugin system architecture and implementation
-- `REST_API_SPEC.md` - REST API mode design and endpoints
-- `SECURITY_TESTING_PLAN.md` - Comprehensive security testing framework
-
-### Development Tools
-- `integration_check.go` - Integration testing script
-- `FINAL_SUMMARY.md` - Current implementation summary
-- `PRD.md` - Original product requirements document
-
-## Key Features Implemented
-
-### CLI Commands
+### 1. CLI Tool
 - `forgeai run <language> <code>` - Execute code directly
-- `forgeai exec <file>` - Execute a file
+- `forgeai exec <file>` - Execute file
 - `forgeai lang list` - List supported languages
-- `forgeai config` - Configure security limits
+- `forgeai --container` - Containerized execution
+- `forgeai --plugin-dir` - Plugin execution
 
-### Go SDK
-- Simple API for integrating code execution into applications
-- Configurable security limits
-- Support for all built-in languages
+### 2. REST API
+- `GET /` - API information
+- `GET /healthz` - Health check
+- `GET /readyz` - Readiness check
+- `GET /v1/languages` - Supported languages
+- `POST /v1/execute` - Code execution
+- `POST /v1/execute/file` - File execution
+- `GET /v1/jobs/{id}` - Job status
+- `DELETE /v1/jobs/{id}` - Cancel job
+- `GET /v1/jobs` - List jobs
+- `GET /v1/status` - Server status
 
-### Security Measures
-- Temporary directory isolation
-- Resource limits (timeout, memory)
-- Automatic cleanup
-- Context-based cancellation
+### 3. Go SDK
+- `executor.NewLocalExecutor()` - Local execution
+- `container.NewDockerExecutor()` - Containerized execution
+- `plugin.NewManager()` - Plugin management
+- `plugin.NewExternalExecutor()` - Plugin execution
 
-### Supported Languages
-- Python
-- Go
-- JavaScript
+### 4. Plugin System
+- Cross-platform plugin support (Windows, Linux, macOS)
+- External executable plugins
+- Plugin manifest system
+- Automatic plugin discovery
+- Plugin registry integration
 
-## Next-Level Enhancements Ready for Implementation
+### 5. Security Features
+- Process isolation
+- Container isolation
+- Plugin isolation
+- Resource limits (CPU, memory, timeout)
+- Network access controls
+- File system restrictions
 
-### 1. Containerized Execution
-- Docker, gVisor, and Firecracker integration
-- Strong isolation with resource controls
-- Language-specific container images
-- Security profiles and policies
+### 6. Performance Features
+- Asynchronous job execution
+- Job queuing
+- Resource pooling
+- Concurrent execution
+- Performance monitoring
 
-### 2. Plugin System
-- Dynamic language support extension
-- Plugin registry and management
-- Secure plugin loading and validation
-- Community plugin development
+## Supported Languages
 
-### 3. Additional Language Support
-- Rust, Java, C#, Ruby, PHP, Swift
-- Language-specific security measures
-- Standard library restrictions
-- Resource usage controls
+### Built-in Support
+- Python (3.9)
+- Go (1.19)
+- JavaScript (Node.js 16)
 
-### 4. REST API Mode
-- HTTP endpoints for remote execution
-- Authentication and authorization
-- Rate limiting and quotas
-- Job management and queuing
+### Plugin Support
+- Hello (example plugin)
+- Rust (simulated plugin)
+- Extensible for any language
 
-### 5. Advanced Security Testing
-- Comprehensive attack simulation
-- Automated security testing
-- Continuous monitoring and alerting
-- Compliance with security standards
+### Container Support
+- Python (python:3.9-alpine)
+- Go (golang:1.19-alpine)
+- JavaScript (node:16-alpine)
 
-### 6. Performance Optimization
-- Container startup optimization
-- Resource pooling and caching
-- Concurrent execution management
-- Memory and CPU optimization
+## Enterprise Features
 
-## Project Status
+### Scalability
+- Horizontal scaling
+- Load balancing
+- Job queuing
+- Resource management
 
-✅ **Core Implementation Complete**
-✅ **CLI Tool Functional**
-✅ **Go SDK Available**
-✅ **Basic Security Measures Implemented**
-✅ **Documentation Complete**
-✅ **Testing Framework Established**
+### Monitoring
+- Health checks
+- Performance metrics
+- Execution logging
+- Error tracking
 
-⏳ **Next-Level Enhancements Planned**
-⏳ **Containerization Ready for Implementation**
-⏳ **Plugin System Designed**
-⏳ **REST API Specification Complete**
-⏳ **Security Testing Framework Ready**
+### Operations
+- Graceful shutdown
+- Configuration management
+- Deployment flexibility
+- Upgrade support
 
-This comprehensive file structure represents a complete, production-ready foundation for ForgeAI with detailed plans for enterprise-grade enhancements.
+This structure provides a comprehensive, well-organized foundation for a production-ready code execution platform with enterprise-grade security, extensibility, and performance features.

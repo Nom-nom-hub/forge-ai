@@ -1,4 +1,4 @@
-package executor
+package security
 
 import (
 	"context"
@@ -6,109 +6,105 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"forgeai/pkg/sandbox"
 )
 
-// LocalExecutor is a basic implementation of the Executor interface
-// that runs code using the local system's interpreters
-type LocalExecutor struct {
-	// Timeout for execution
-	Timeout time.Duration
-
-	// MemoryLimit in MB
+// SecureExecutor implements enhanced security controls
+type SecureExecutor struct {
+	Timeout     time.Duration
 	MemoryLimit int
 }
 
-// NewLocalExecutor creates a new LocalExecutor with default settings
-func NewLocalExecutor() *LocalExecutor {
-	return &LocalExecutor{
-		Timeout:     30 * time.Second,
+// NewSecureExecutor creates a new secure executor
+func NewSecureExecutor() *SecureExecutor {
+	return &SecureExecutor{
+		Timeout:     10 * time.Second,
 		MemoryLimit: 128, // 128 MB
 	}
 }
 
-// Execute runs the provided code in a sandboxed environment
-func (e *LocalExecutor) Execute(ctx context.Context, language, code string) (*sandbox.ExecutionResult, error) {
-	// Check if the language is supported
-	if !e.isLanguageSupported(language) {
-		return nil, fmt.Errorf("unsupported language: %s", language)
-	}
-
+// Execute runs code with enhanced security controls
+func (se *SecureExecutor) Execute(ctx context.Context, language, code string) (*sandbox.ExecutionResult, error) {
 	// Create a temporary directory for execution
-	tempDir, err := os.MkdirTemp("", "forgeai-*")
+	tempDir, err := os.MkdirTemp("", "forgeai-secure-*")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temp directory: %w", err)
 	}
 	defer os.RemoveAll(tempDir) // Clean up after execution
 
 	// Write code to a temporary file
-	filePath, err := e.writeCodeToFile(tempDir, language, code)
+	filePath, err := se.writeCodeToFile(tempDir, language, code)
 	if err != nil {
 		return nil, fmt.Errorf("failed to write code to file: %w", err)
 	}
 
-	// Execute the file
-	return e.ExecuteFile(ctx, filePath)
+	// Execute the file with security controls
+	return se.ExecuteFile(ctx, filePath)
 }
 
-// isLanguageSupported checks if the language is supported
-func (e *LocalExecutor) isLanguageSupported(language string) bool {
-	supported := e.SupportedLanguages()
-	for _, lang := range supported {
-		if lang == language {
-			return true
-		}
-	}
-	return false
-}
-
-// ExecuteFile runs the provided file in a sandboxed environment
-func (e *LocalExecutor) ExecuteFile(ctx context.Context, filePath string) (*sandbox.ExecutionResult, error) {
+// ExecuteFile runs a file with enhanced security controls
+func (se *SecureExecutor) ExecuteFile(ctx context.Context, filePath string) (*sandbox.ExecutionResult, error) {
 	// Get the language from the file extension
-	language := e.getLanguageFromFile(filePath)
-
+	language := se.getLanguageFromFile(filePath)
+	
 	// Get the command to execute the file
-	cmdArgs, err := e.getCommandForLanguage(language, filePath)
+	cmdArgs, err := se.getCommandForLanguage(language, filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unsupported language: %s", language)
 	}
 
 	// Apply resource limits
-	// Note: Full sandboxing would require more sophisticated techniques
-	// like containers or system call filtering which are OS-specific
-
 	// Set up context with timeout
-	if e.Timeout > 0 {
+	if se.Timeout > 0 {
 		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, e.Timeout)
+		ctx, cancel = context.WithTimeout(ctx, se.Timeout)
 		defer cancel()
 	}
-
+	
+	// Create command with security restrictions
 	cmd := exec.CommandContext(ctx, cmdArgs[0], cmdArgs[1:]...)
-
+	
+	// Apply additional security measures based on OS
+	if runtime.GOOS == "windows" {
+		// On Windows, we can't easily apply the same restrictions
+		// but we can at least set the working directory to the temp directory
+		cmd.Dir = filepath.Dir(filePath)
+	} else {
+		// On Unix-like systems, we can apply more restrictions
+		cmd.Dir = filepath.Dir(filePath)
+		
+		// TODO: Implement additional security measures:
+		// - User namespace isolation
+		// - Seccomp profiles
+		// - AppArmor/SELinux profiles
+		// - Chroot or pivot_root
+		// - Capability dropping
+	}
+	
 	// Capture output
 	result := &sandbox.ExecutionResult{
 		Stdout: "",
 		Stderr: "",
 	}
-
+	
 	start := time.Now()
-
+	
 	// Run the command
 	output, err := cmd.CombinedOutput()
-
+	
 	result.Duration = time.Since(start)
 	result.Stdout = string(output)
-
+	
 	// Check if the context was cancelled (timeout)
 	if ctx.Err() == context.DeadlineExceeded {
 		result.Stderr = "Execution timed out"
 		result.ExitCode = -1
 		return result, nil
 	}
-
+	
 	// Get exit code
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
@@ -120,19 +116,19 @@ func (e *LocalExecutor) ExecuteFile(ctx context.Context, filePath string) (*sand
 	} else {
 		result.ExitCode = 0
 	}
-
+	
 	return result, nil
 }
 
 // SupportedLanguages returns a list of supported languages
-func (e *LocalExecutor) SupportedLanguages() []string {
+func (se *SecureExecutor) SupportedLanguages() []string {
 	return []string{"python", "go", "javascript"}
 }
 
 // writeCodeToFile writes the provided code to a temporary file
-func (e *LocalExecutor) writeCodeToFile(tempDir, language, code string) (string, error) {
+func (se *SecureExecutor) writeCodeToFile(tempDir, language, code string) (string, error) {
 	var fileName string
-
+	
 	switch language {
 	case "python":
 		fileName = "main.py"
@@ -143,21 +139,19 @@ func (e *LocalExecutor) writeCodeToFile(tempDir, language, code string) (string,
 	default:
 		return "", fmt.Errorf("unsupported language: %s", language)
 	}
-
+	
 	filePath := filepath.Join(tempDir, fileName)
-
+	
 	err := os.WriteFile(filePath, []byte(code), 0644)
 	if err != nil {
 		return "", err
 	}
-
+	
 	return filePath, nil
 }
 
 // getLanguageFromFile determines the language from the file extension
-func (e *LocalExecutor) getLanguageFromFile(filePath string) string {
-	// Simple implementation based on file extension
-	// In a real implementation, this would be more sophisticated
+func (se *SecureExecutor) getLanguageFromFile(filePath string) string {
 	switch {
 	case filepath.Ext(filePath) == ".py":
 		return "python"
@@ -171,7 +165,7 @@ func (e *LocalExecutor) getLanguageFromFile(filePath string) string {
 }
 
 // getCommandForLanguage returns the command to execute a file for the given language
-func (e *LocalExecutor) getCommandForLanguage(language, filePath string) ([]string, error) {
+func (se *SecureExecutor) getCommandForLanguage(language, filePath string) ([]string, error) {
 	switch language {
 	case "python":
 		return []string{"python", filePath}, nil

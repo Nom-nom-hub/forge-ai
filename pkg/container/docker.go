@@ -169,7 +169,7 @@ func (d *DockerExecutor) getImageForLanguage(language string) string {
 
 func (d *DockerExecutor) runContainer(ctx context.Context, config *DockerConfig) (*sandbox.ExecutionResult, error) {
 	// Check if Docker is available
-	if !d.isDockerAvailable() {
+	if !d.IsDockerAvailable() {
 		return nil, fmt.Errorf("docker is not available")
 	}
 	
@@ -262,7 +262,8 @@ func (d *DockerExecutor) runContainer(ctx context.Context, config *DockerConfig)
 	return result, nil
 }
 
-func (d *DockerExecutor) isDockerAvailable() bool {
+// IsDockerAvailable checks if Docker is available
+func (d *DockerExecutor) IsDockerAvailable() bool {
 	cmd := exec.Command("docker", "--version")
 	err := cmd.Run()
 	return err == nil

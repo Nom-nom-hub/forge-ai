@@ -5,20 +5,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"forgeai/pkg/container"
 	"forgeai/pkg/executor"
+	"forgeai/pkg/plugin"
 	"forgeai/pkg/sandbox"
 )
 
 var (
-	jsonOutput  bool
+	jsonOutput   bool
 	containerized bool
-	timeout     time.Duration
-	memoryLimit int
+	pluginDir    string
+	timeout      time.Duration
+	memoryLimit  int
 )
 
 var rootCmd = &cobra.Command{
@@ -37,20 +40,10 @@ var runCmd = &cobra.Command{
 		language := args[0]
 		code := args[1]
 
-		var exec sandbox.Executor
-
-		if containerized {
-			// Use containerized executor
-			dockerExec := container.NewDockerExecutor()
-			dockerExec.Timeout = timeout
-			dockerExec.MemoryLimit = memoryLimit
-			exec = dockerExec
-		} else {
-			// Use local executor
-			localExec := executor.NewLocalExecutor()
-			localExec.Timeout = timeout
-			localExec.MemoryLimit = memoryLimit
-			exec = localExec
+		// Get the appropriate executor
+		exec, err := getExecutor()
+		if err != nil {
+			return fmt.Errorf("failed to get executor: %w", err)
 		}
 
 		// Execute code
@@ -71,24 +64,14 @@ var execCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		file := args[0]
 
-		var executor sandbox.Executor
-
-		if containerized {
-			// Use containerized executor
-			dockerExec := container.NewDockerExecutor()
-			dockerExec.Timeout = timeout
-			dockerExec.MemoryLimit = memoryLimit
-			executor = dockerExec
-		} else {
-			// Use local executor
-			localExec := executor.NewLocalExecutor()
-			localExec.Timeout = timeout
-			localExec.MemoryLimit = memoryLimit
-			executor = localExec
+		// Get the appropriate executor
+		exec, err := getExecutor()
+		if err != nil {
+			return fmt.Errorf("failed to get executor: %w", err)
 		}
 
 		// Execute file
-		result, err := executor.ExecuteFile(context.Background(), file)
+		result, err := exec.ExecuteFile(context.Background(), file)
 		if err != nil {
 			return fmt.Errorf("failed to execute file: %w", err)
 		}
@@ -107,17 +90,13 @@ var langListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List supported languages",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var languages []string
-
-		if containerized {
-			// Use containerized executor
-			exec := container.NewDockerExecutor()
-			languages = exec.SupportedLanguages()
-		} else {
-			// Use local executor
-			exec := executor.NewLocalExecutor()
-			languages = exec.SupportedLanguages()
+		// Get the appropriate executor
+		exec, err := getExecutor()
+		if err != nil {
+			return fmt.Errorf("failed to get executor: %w", err)
 		}
+
+		languages := exec.SupportedLanguages()
 
 		if jsonOutput {
 			return json.NewEncoder(os.Stdout).Encode(languages)
@@ -144,6 +123,7 @@ var configCmd = &cobra.Command{
 func init() {
 	rootCmd.PersistentFlags().BoolVar(&jsonOutput, "json", false, "Output results in JSON format")
 	rootCmd.PersistentFlags().BoolVar(&containerized, "container", false, "Use containerized execution")
+	rootCmd.PersistentFlags().StringVar(&pluginDir, "plugin-dir", "", "Directory to load plugins from")
 	rootCmd.PersistentFlags().DurationVar(&timeout, "timeout", 30*time.Second, "Execution timeout")
 	rootCmd.PersistentFlags().IntVar(&memoryLimit, "memory-limit", 128, "Memory limit in MB")
 
@@ -158,6 +138,122 @@ func init() {
 
 func Execute() error {
 	return rootCmd.Execute()
+}
+
+// getExecutor returns the appropriate executor based on the flags
+func getExecutor() (sandbox.Executor, error) {
+	if pluginDir != "" {
+		// Use plugin manager
+		manager := plugin.NewManager()
+		if err := manager.LoadPluginsFromDir(pluginDir); err != nil {
+			return nil, fmt.Errorf("failed to load plugins: %w", err)
+		}
+		
+		// If containerized flag is also set, we need to handle this case
+		// For now, we'll prioritize plugins over containerized execution
+		if containerized {
+			fmt.Println("Warning: Both --plugin-dir and --container flags are set. Using plugins.")
+		}
+		
+		// Return a composite executor that can handle both plugins and default executors
+		return &CompositeExecutor{
+			PluginManager: manager,
+			LocalExecutor: executor.NewLocalExecutor(),
+			DockerExecutor: container.NewDockerExecutor(),
+			UseContainer: containerized,
+		}, nil
+	} else if containerized {
+		// Use containerized executor
+		dockerExec := container.NewDockerExecutor()
+		dockerExec.Timeout = timeout
+		dockerExec.MemoryLimit = memoryLimit
+		return dockerExec, nil
+	} else {
+		// Use local executor
+		localExec := executor.NewLocalExecutor()
+		localExec.Timeout = timeout
+		localExec.MemoryLimit = memoryLimit
+		return localExec, nil
+	}
+}
+
+// CompositeExecutor combines plugin, local, and container executors
+type CompositeExecutor struct {
+	PluginManager  *plugin.Manager
+	LocalExecutor  *executor.LocalExecutor
+	DockerExecutor *container.DockerExecutor
+	UseContainer   bool
+}
+
+func (c *CompositeExecutor) Execute(ctx context.Context, language, code string) (*sandbox.ExecutionResult, error) {
+	// Check if we have a plugin for this language
+	if executor, ok := c.PluginManager.GetExecutor(language); ok {
+		return executor.Execute(ctx, language, code)
+	}
+	
+	// Use the appropriate executor based on the UseContainer flag
+	if c.UseContainer {
+		c.DockerExecutor.Timeout = c.LocalExecutor.Timeout
+		c.DockerExecutor.MemoryLimit = c.LocalExecutor.MemoryLimit
+		return c.DockerExecutor.Execute(ctx, language, code)
+	}
+	
+	return c.LocalExecutor.Execute(ctx, language, code)
+}
+
+func (c *CompositeExecutor) ExecuteFile(ctx context.Context, filePath string) (*sandbox.ExecutionResult, error) {
+	// Get the language from the file extension
+	language := getLanguageFromFile(filePath)
+	
+	// Check if we have a plugin for this language
+	if executor, ok := c.PluginManager.GetExecutor(language); ok {
+		return executor.ExecuteFile(ctx, filePath)
+	}
+	
+	// Use the appropriate executor based on the UseContainer flag
+	if c.UseContainer {
+		c.DockerExecutor.Timeout = c.LocalExecutor.Timeout
+		c.DockerExecutor.MemoryLimit = c.LocalExecutor.MemoryLimit
+		return c.DockerExecutor.ExecuteFile(ctx, filePath)
+	}
+	
+	return c.LocalExecutor.ExecuteFile(ctx, filePath)
+}
+
+func (c *CompositeExecutor) SupportedLanguages() []string {
+	// Get languages from plugins
+	pluginLanguages := c.PluginManager.SupportedLanguages()
+	
+	// Get languages from the appropriate executor
+	var defaultLanguages []string
+	if c.UseContainer {
+		defaultLanguages = c.DockerExecutor.SupportedLanguages()
+	} else {
+		defaultLanguages = c.LocalExecutor.SupportedLanguages()
+	}
+	
+	// Combine the lists
+	languages := make([]string, 0, len(pluginLanguages)+len(defaultLanguages))
+	languages = append(languages, pluginLanguages...)
+	languages = append(languages, defaultLanguages...)
+	
+	return languages
+}
+
+// getLanguageFromFile determines the language from the file extension
+func getLanguageFromFile(filePath string) string {
+	switch {
+	case filepath.Ext(filePath) == ".py":
+		return "python"
+	case filepath.Ext(filePath) == ".go":
+		return "go"
+	case filepath.Ext(filePath) == ".js":
+		return "javascript"
+	case filepath.Ext(filePath) == ".rs":
+		return "rust"
+	default:
+		return "unknown"
+	}
 }
 
 func printResult(result *sandbox.ExecutionResult) error {
