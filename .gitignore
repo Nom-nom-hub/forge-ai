@@ -70,5 +70,19 @@ test-results/
 # Plugin binaries
 plugins/*/*
 
+# Development documentation (keep only user-facing docs)
+docs/ADVANCED_*
+docs/API_IMPLEMENTATION_*
+docs/COMPLETE_*
+docs/CONTAINER_*
+docs/DEVELOPMENT_*
+docs/FINAL_*
+docs/LANGUAGE_*
+docs/NEXT_*
+docs/PERFORMANCE_*
+docs/PLUGIN_*
+docs/REST_*
+docs/SECURITY_*
+
 # Documentation files (except README.md)
 docs/*.md
