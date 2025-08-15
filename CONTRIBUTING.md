@@ -38,10 +38,11 @@ We welcome suggestions for new features or improvements. Please create an issue 
 
 ## Development Setup
 
-1. Install Go 1.21+
-2. Clone your fork of the repository
-3. Run `go mod tidy` to install dependencies
-4. Run tests with `go test ./...`
+1. Install Go 1.19+
+2. Install Docker (for containerized execution)
+3. Clone your fork of the repository
+4. Run `make deps` to install dependencies
+5. Run `make test` to run tests
 
 ## Coding Standards
 
@@ -76,7 +77,7 @@ We welcome suggestions for new features or improvements. Please create an issue 
 
 ## Security Issues
 
-If you discover a security vulnerability, please send an email to [security@forgeai.dev] instead of using the issue tracker.
+If you discover a security vulnerability, please send an email to security@forgeai.dev instead of using the issue tracker.
 
 ## Getting Help
 

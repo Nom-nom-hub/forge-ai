@@ -3,19 +3,37 @@
 # Variables
 BINARY=forgeai
 API_BINARY=forgeai-api
+PLUGIN_BINARY=forgeai-plugin
+SECURITY_BINARY=forgeai-security
+PERF_BINARY=forgeai-perf
 MAIN_FILE=cmd/forgeai/main.go
 API_MAIN_FILE=cmd/api/main.go
+PLUGIN_MAIN_FILE=cmd/plugin/main.go
+SECURITY_MAIN_FILE=cmd/security/main.go
+PERF_MAIN_FILE=cmd/performance/main.go
 
 # Default target
-all: build
+all: build build-api build-plugin build-security build-perf
 
-# Build the binary
+# Build the CLI binary
 build:
 	go build -o ${BINARY} ${MAIN_FILE}
 
 # Build the API server
 build-api:
 	go build -o ${API_BINARY} ${API_MAIN_FILE}
+
+# Build the plugin manager
+build-plugin:
+	go build -o ${PLUGIN_BINARY} ${PLUGIN_MAIN_FILE}
+
+# Build the security testing tool
+build-security:
+	go build -o ${SECURITY_BINARY} ${SECURITY_MAIN_FILE}
+
+# Build the performance testing tool
+build-perf:
+	go build -o ${PERF_BINARY} ${PERF_MAIN_FILE}
 
 # Install dependencies
 deps:
@@ -39,7 +57,7 @@ test-integration:
 
 # Clean build artifacts
 clean:
-	rm -f ${BINARY} ${API_BINARY}
+	rm -f ${BINARY} ${API_BINARY} ${PLUGIN_BINARY} ${SECURITY_BINARY} ${PERF_BINARY}
 
 # Install the binary
 install:
@@ -69,14 +87,21 @@ release:
 release-api:
 	go build -ldflags "-s -w" -o ${API_BINARY} ${API_MAIN_FILE}
 
+# Release build for plugin manager
+release-plugin:
+	go build -ldflags "-s -w" -o ${PLUGIN_BINARY} ${PLUGIN_MAIN_FILE}
+
 # Help
 help:
 	@echo "ForgeAI Makefile"
 	@echo ""
 	@echo "Usage:"
-	@echo "  make              Build the CLI binary"
+	@echo "  make              Build all binaries"
 	@echo "  make build        Build the CLI binary"
 	@echo "  make build-api    Build the API server"
+	@echo "  make build-plugin Build the plugin manager"
+	@echo "  make build-security Build the security testing tool"
+	@echo "  make build-perf   Build the performance testing tool"
 	@echo "  make deps         Install dependencies"
 	@echo "  make test         Run tests"
 	@echo "  make test-coverage Run tests with coverage"
@@ -90,6 +115,7 @@ help:
 	@echo "  make docs         Generate documentation"
 	@echo "  make release      Release build for CLI"
 	@echo "  make release-api  Release build for API"
+	@echo "  make release-plugin Release build for plugin manager"
 	@echo "  make help         Show this help"
 
-.PHONY: all build build-api deps test test-coverage test-verbose test-integration clean install fmt vet lint docs release release-api help
+.PHONY: all build build-api build-plugin build-security build-perf deps test test-coverage test-verbose test-integration clean install fmt vet lint docs release release-api release-plugin help
