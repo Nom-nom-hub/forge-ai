@@ -1,18 +1,33 @@
 # Binaries
 forgeai
-*.exe
+forgeai.exe
+forgeai-api
+forgeai-api.exe
+forgeai-plugin
+forgeai-plugin.exe
+forgeai-security
+forgeai-security.exe
+forgeai-perf
+forgeai-perf.exe
+forgeai-performance
+forgeai-performance.exe
 
 # Build artifacts
-dist/
-build/
-
-# Go
+*.exe
 *.out
 *.test
+
+# Go
+go.mod
+go.sum
+bin/
+pkg/
 
 # Temporary files
 tmp/
 temp/
+*.tmp
+*.temp
 
 # Logs
 *.log
@@ -34,41 +49,23 @@ coverage.html
 # Dependencies
 vendor/
 
-# MD files
-NEXT_LEVEL_ENHANCEMENTS.md
-COMPLETE_ROADMAP.md
-CONTAINERIZED_EXECUTION_SPEC.md
-PLUGIN_SYSTEM_SPEC.md
-REST_API_SPEC.md
-PLUGIN_SYSTEM_SPEC.md
-SECURITY_TESTING_PLAN.md
-DEVELOPMENT_PROGRESS_SUMMARY.md
-PRD.md
-PROJECT_STRUCTURE.md
-FINAL_SUMMARY.md
-PLUGIN_IMPLEMENTATION_SUMMARY.md
-COMPLETE_ROADMAP.md
-CONTAINER_IMPLEMENTATION_SUMMARY.md
-FINAL_IMPLEMENTATION_SUMMARY.md
-API_IMPLEMENTATION_SUMMARY.md
-NEXT_STEPS_PROGRESS.md
-NEXT_LEVEL_ENHANCEMENTS.md
-COMPLETE_ROADMAP.md
-CONTAINERIZED_EXECUTION_SPEC.md
-PLUGIN_SYSTEM_SPEC.md
-REST_API_SPEC.md
-ADVANCED_SECURITY_TESTING.md
-SECURITY_IMPLEMENTATION_PLAN.md
-SECURITY_TESTING_SUMMARY.md
-SECURITY_IMPLEMENTATION_SUMMARY.md
-PERFORMANCE_OPTIMIZATION_SUMMARY.md
-LANGUAGE_SUPPORT_SUMMARY.md
-PLUGIN_REGISTRY_SUMMARY.md
-FORGEAI_FINAL_SUMMARY.md
-PROJECT_STRUCTURE.md
-DEVELOPMENT_JOURNEY.md
-FORGEAI_COMPLETE.md
-FORGEAI_PROGRESS.md
-FORGEAI_PROGRESS.MD
+# Environment files
+.env
+.env.local
+.env.*.local
 
+# Build directories
+dist/
+build/
+release/
 
+# Documentation artifacts
+docs/*.html
+docs/*.pdf
+
+# Test artifacts
+test-output/
+test-results/
+
+# Plugin binaries
+plugins/*/*
