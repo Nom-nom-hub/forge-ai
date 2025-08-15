@@ -1,4 +1,4 @@
-# ForgeAI REST API Documentation
+# API Documentation
 
 ## Overview
 

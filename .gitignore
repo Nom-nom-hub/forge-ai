@@ -69,3 +69,6 @@ test-results/
 
 # Plugin binaries
 plugins/*/*
+
+# Documentation files (except README.md)
+docs/*.md
